@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Python Quest</title>
+<style>
+:root{--bg:#f4f3ff;--card:#fff;--tx:#1b1b3a;--mu:#6b6b8f;--ac:#6a4cff;--ok:#12a150;--bd:#dcd9f5;--code:#15162b;--cf:#c9f1ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1020;--card:#191a33;--tx:#eeeeff;--mu:#9a9ac0;--ac:#8d73ff;--bd:#2b2d55;--code:#0a0b18}}
+:root[data-theme="dark"]{--bg:#0f1020;--card:#191a33;--tx:#eeeeff;--mu:#9a9ac0;--ac:#8d73ff;--bd:#2b2d55;--code:#0a0b18}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.w{max-width:760px;margin:0 auto;padding:16px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:14px}
+h1{margin:0 0 6px;font-size:28px}h2{margin:0 0 10px;font-size:19px}.mu{color:var(--mu);font-size:14px}
+input[type=text],textarea{width:100%;padding:12px;border-radius:10px;border:2px solid var(--bd);background:var(--bg);color:var(--tx);font:15px ui-monospace,Menlo,monospace;margin:6px 0}
+textarea{resize:vertical;min-height:150px}
+input:focus,textarea:focus{outline:none;border-color:var(--ac)}
+button{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:11px 18px;font:600 15px inherit;cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}button.g{background:transparent;color:var(--tx);border:2px solid var(--bd)}
+pre{background:var(--code);color:var(--cf);padding:16px;border-radius:12px;overflow-x:auto;font:14px/1.6 ui-monospace,Menlo,monospace;margin:12px 0;user-select:none;-webkit-user-select:none}
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.bar{height:10px;background:var(--bd);border-radius:6px;overflow:hidden;flex:1;min-width:100px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),#2ec4b6);transition:width .4s}
+.map{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.map b{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;border:2px solid var(--bd);font-size:13px;cursor:pointer}
+.map b.a{background:var(--ac);color:#fff;border-color:var(--ac)}.map b.cu{outline:3px solid var(--ok)}
+.row{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-top:12px}
+.tag{display:inline-block;background:var(--ac);color:#fff;border-radius:20px;padding:2px 12px;font-size:12px;font-weight:700}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:#e5384f;color:#fff;padding:10px 18px;border-radius:10px;display:none;z-index:50;font-weight:600}
+.big{font-size:56px;font-weight:800;color:var(--ac)}
+</style></head><body>
+<div id="toast"></div>
+<div class="w" id="app"></div>
+<script>
+const TOTAL=90; // minutes. Students can submit any time before this.
+const PARTS=["Predict the Output","Fill in the Blanks","Debug the Code","Write the Code"],PN=[8,6,5,3];
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+function H(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}return h>>>0}
+function RNG(seed){let a=seed;const f=()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+return{i:(x,y)=>x+Math.floor(f()*(y-x+1)),p:a=>a[Math.floor(f()*a.length)],sh:a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(f()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}}}
+const L=a=>`[${a.join(", ")}]`;
+const G=[
+// PART 1: predict the output
+r=>{let a=r.i(2,9),b=r.i(2,9),c=r.i(2,9);return{c:`a = ${a}\nb = ${b}\nc = ${c}\nprint(a + b * c)`,a:[String(a+b*c)]}},
+r=>{let w=r.p(["python","coding","student","laptop","science"]);return{c:`word = "${w}"\nprint(word.upper(), len(word))`,a:[`${w.toUpperCase()} ${w.length}`],h:"Two things separated by a space"}},
+r=>{let n=r.i(4,8);return{c:`total = 0\nfor i in range(1, ${n+1}):\n    total += i\nprint(total)`,a:[String(n*(n+1)/2)]}},
+r=>{let l=Array.from({length:5},()=>r.i(1,30));return{c:`nums = ${L(l)}\nprint(len(nums), max(nums))`,a:[`5 ${Math.max(...l)}`],h:"Two numbers separated by a space"}},
+r=>{let x=r.i(1,30);return{c:`x = ${x}\nif x > 20:\n    print("big")\nelif x > 10:\n    print("medium")\nelse:\n    print("small")`,a:[x>20?"big":x>10?"medium":"small"]}},
+r=>{let x=r.i(2,9),y=r.i(2,9);return{c:`d = {"a": ${x}, "b": ${y}}\nd["c"] = d["a"] + d["b"]\nprint(len(d), d["c"])`,a:[`3 ${x+y}`],h:"Two numbers separated by a space"}},
+r=>{let n=r.i(1,4),lim=r.i(30,100),v=n;while(v<lim)v*=2;return{c:`n = ${n}\nwhile n < ${lim}:\n    n = n * 2\nprint(n)`,a:[String(v)]}},
+r=>{let x=r.i(2,9),y=r.i(2,9);return{c:`def f(a, b):\n    return a * b + 1\n\nprint(f(${x}, ${y}))`,a:[String(x*y+1)]}},
+// PART 2: fill in the blanks
+r=>{let n=r.i(4,9);return{t:`Fill in the blank so the loop prints the numbers 1 to ${n}.`,c:`for i in range(1, ___):\n    print(i)`,a:[String(n+1)],h:"Type the missing number"}},
+r=>{return{t:"Fill in the blank to add each number to the total.",c:`nums = ${L(Array.from({length:4},()=>r.i(1,9)))}\ntotal = 0\nfor n in nums:\n    total ___ n\nprint(total)`,a:["+="],h:"Type the missing operator"}},
+r=>{let x=r.i(10,99);return{t:"Fill in the blank to check if x is even.",c:`x = ${x}\nif x ___ 2 == 0:\n    print("even")`,a:["%"],h:"Type the missing operator"}},
+r=>{let l=r.sh(["apple","mango","grape","lemon"]).slice(0,3);return{t:"Fill in the blank to add \"kiwi\" to the end of the list.",c:`fruits = ${JSON.stringify(l)}\nfruits.___("kiwi")`,a:["append"],h:"Type the missing method name"}},
+r=>{let f=r.p(["square","double","triple"]),op={square:"n * n",double:"n * 2",triple:"n * 3"}[f];return{t:"Fill in the blank to define a function.",c:`___ ${f}(n):\n    return ${op}`,a:["def"],h:"Type the missing keyword"}},
+r=>{let w=r.p(["rohan","python","student","school"]);return{t:"Fill in the blank to print how many characters the text has.",c:`name = "${w}"\nprint(___(name))`,a:["len"],h:"Type the missing function name"}},
+// PART 3: debug
+r=>{let n=r.i(4,9);return{bug:1,t:"This code has a syntax error. Which line number has the bug?",c:`total = 0\nfor i in range(${n})\n    total += i\nprint(total)`,a:["2"]}},
+r=>{let x=r.i(5,15);return{bug:1,t:"This code should print ten when x is 10, but it crashes. Which line has the bug?",c:`x = ${x}\nif x = 10:\n    print("ten")`,a:["2"]}},
+r=>{let a=r.i(60,95),b=r.i(2,9);return{bug:1,t:"This code crashes with a NameError. Which line has the bug?",c:`score = ${a}\nbonus = ${b}\nprint(scor + bonus)`,a:["3"]}},
+r=>{let l=Array.from({length:4},()=>r.i(2,9)*2);return{bug:1,t:"This should print the average of the numbers, but the answer is wrong. Which line has the bug?",c:`nums = ${L(l)}\ntotal = sum(nums)\naverage = total * len(nums)\nprint(average)`,a:["3"]}},
+r=>{let age=r.i(10,25);return{bug:1,t:"This code crashes with a TypeError. Which line has the bug?",c:`age = ${age}\nmessage = "I am " + age + " years old"\nprint(message)`,a:["2"]}},
+// PART 4: write code (teacher reviewed)
+r=>{let n=r.i(8,14);return{code:1,t:"Write a function is_even(n) that returns True if n is even and False otherwise.",h:`Example: is_even(${n}) gives ${n%2==0?"True":"False"}`}},
+r=>{let n=r.i(5,12);return{code:1,t:`Write a program that prints the sum of all numbers from 1 to ${n}.`,h:`Expected output: ${n*(n+1)/2}`}},
+r=>{let w=r.p(["education","python","beautiful","science"]),c=[...w].filter(x=>"aeiou".includes(x)).length;return{code:1,t:"Write a function count_vowels(text) that returns how many vowels (a, e, i, o, u) the text has.",h:`Example: count_vowels("${w}") gives ${c}`}}
+];
+const norm=s=>(s||"").trim().toLowerCase().replace(/['"]/g,"").replace(/^line\s*/,"").replace(/\s+/g," ");
+let Q=[],ans=[],fix=[],cur=0,t0=0,log=[],started=false,done=false,P={};
+const $=id=>document.getElementById(id),app=$("app");
+const mm=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+function home(){app.innerHTML=`<div class="c"><span class="tag">PYTHON</span><h1>🐍 Python Quest</h1><p class="mu">4 parts: predict the output, fill in the blanks, debug the code and write the code. Take your time and do your best.</p>
+<input type="text" id="nm" placeholder="Your full name" autocomplete="off"><div class="row"><span class="mu" id="er"></span><button id="go">Start the Quest</button></div></div>`;
+$("go").onclick=()=>{const n=$("nm").value.trim();if(n.length<2){$("er").textContent="Please enter your full name.";return}P={n};begin()}}
+function begin(){const r=RNG(H(P.n.toLowerCase()));let k=0;Q=[];
+PN.forEach((cnt,p)=>{r.sh(Array.from({length:cnt},(_,i)=>k+i)).forEach(i=>Q.push({p,...G[i](r)}));k+=cnt});
+ans=Q.map(()=>"");fix=Q.map(()=>"");t0=Date.now();started=true;setInterval(tick,1000);render()}
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)}
+function away(){if(started&&!done){log.push(mm((Date.now()-t0)/1000)+" left the tab");toast("Please stay on this page during the test")}}
+function hud(){if(!$("tm"))return;const n=ans.filter(x=>x.trim()).length;$("tm").textContent="⏱ "+mm(TOTAL*60-(Date.now()-t0)/1000);$("xp").style.width=(n/Q.length*100)+"%";$("xt").textContent=n+"/"+Q.length+" answered"}
+function tick(){if(done)return;if((Date.now()-t0)/1000>=TOTAL*60)finish("Time up");else hud()}
+function render(){const q=Q[cur],wm=encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="230" height="90"><text x="10" y="55" font-size="13" fill="#fff" fill-opacity="0.15" transform="rotate(-18 115 45)" font-family="monospace">${esc(P.n)}</text></svg>`);
+const title=q.t||"What does this print?";
+app.innerHTML=`<div class="hud"><b id="tm"></b><div class="bar"><i id="xp"></i></div><span class="mu" id="xt"></span></div>
+<div class="c"><span class="tag">PART ${q.p+1}: ${PARTS[q.p].toUpperCase()}</span> <span class="mu">Question ${cur+1} of ${Q.length}</span>
+<h2 style="margin-top:12px">${esc(title)}</h2>
+${q.c?`<div style="position:relative"><pre>${esc(q.c)}</pre><div style="position:absolute;inset:0;pointer-events:none;background-image:url(data:image/svg+xml,${wm})"></div></div>`:""}
+${q.code?`<textarea id="an" spellcheck="false" placeholder="Type your Python code here">${esc(ans[cur])}</textarea>`:`<input type="text" id="an" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Your answer" value="${esc(ans[cur])}">`}
+<div class="mu">${esc(q.h||"")}</div>
+${q.bug?`<input type="text" id="fx" autocomplete="off" spellcheck="false" placeholder="Optional: type the corrected line" value="${esc(fix[cur])}">`:""}
+<div class="map">${Q.map((x,i)=>`<b class="${ans[i].trim()?"a":""} ${i==cur?"cu":""}" data-i="${i}">${i+1}</b>`).join("")}</div>
+<div class="row"><button class="g" id="pv" ${cur==0?"disabled":""}>Back</button><button id="nx" ${cur==Q.length-1?"disabled":""}>Next</button></div></div>
+<div class="row"><span class="mu">${esc(P.n)}</span><button id="sub">Submit test</button></div>`;
+const a=$("an");a.oninput=()=>{ans[cur]=a.value;hud();document.querySelector(`.map b[data-i="${cur}"]`).classList.toggle("a",!!a.value.trim())};
+if(q.code)a.onkeydown=e=>{if(e.key=="Tab"){e.preventDefault();const s=a.selectionStart;a.value=a.value.slice(0,s)+"    "+a.value.slice(a.selectionEnd);a.selectionStart=a.selectionEnd=s+4;a.oninput()}};
+if($("fx"))$("fx").oninput=()=>{fix[cur]=$("fx").value};
+$("pv").onclick=()=>{cur--;render()};$("nx").onclick=()=>{cur++;render()};
+document.querySelectorAll(".map b").forEach(b=>b.onclick=()=>{cur=+b.dataset.i;render()});
+$("sub").onclick=()=>{const u=ans.filter(x=>!x.trim()).length;if(confirm(u?`You have ${u} unanswered questions. Submit anyway?`:"Submit your test?"))finish("Submitted")};hud();a.focus()}
+function finish(why){if(done)return;done=true;let sc=0,pt=[0,0,0,0];
+Q.forEach((q,i)=>{if(!q.code&&q.a.some(x=>norm(x)===norm(ans[i]))){sc++;pt[q.p]++}});
+const el=Math.round((Date.now()-t0)/1000),auto=PN[0]+PN[1]+PN[2],pc=sc/auto*100,rank=pc>=90?"🏆 Python Grandmaster":pc>=70?"⚔️ Code Knight":pc>=50?"🛡️ Apprentice Coder":"🌱 Rising Coder";
+const written=Q.map((q,i)=>q.code?{q:q.t,code:ans[i]}:q.bug?{q:"Bug fix",fix:fix[i]}:null).filter(Boolean);
+const rep=btoa(unescape(encodeURIComponent(JSON.stringify({name:P.n,score:sc,of:auto,parts:pt,time:mm(el),log,reason:why,written}))));
+app.innerHTML=`<div class="c" style="text-align:center"><span class="tag">${esc(why)}</span><h1>Quest complete</h1><div class="big">${sc}/${auto}</div><h2>${rank}</h2>
+<p class="mu">${esc(P.n)} | Time used ${mm(el)}</p>
+<div style="text-align:left">${[0,1,2].map(i=>`<div>Part ${i+1}: ${PARTS[i]} <b>${pt[i]}/${PN[i]}</b></div><div class="bar" style="margin:4px 0 10px"><i style="width:${pt[i]/PN[i]*100}%"></i></div>`).join("")}
+<div>Part 4: ${PARTS[3]} <b>reviewed by your teacher</b></div></div></div>
+<div class="c"><h2>Send this report code to your teacher</h2><p class="mu">It has your score and your written code.</p>
+<input type="text" id="rp" readonly value="${rep}"><div class="row"><span></span><button id="cp">Copy report code</button></div></div>`;
+$("cp").onclick=()=>{const e=$("rp");e.select();document.execCommand("copy");$("cp").textContent="Copied"}}
+["copy","cut","paste","contextmenu"].forEach(e=>document.addEventListener(e,ev=>{if(started&&!done)ev.preventDefault()}));
+document.addEventListener("visibilitychange",()=>{if(document.hidden)away()});
+home();
+</script></body></html>
